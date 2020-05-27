@@ -36,9 +36,12 @@ var dockerPreCmd = &cobra.Command{
 
 		tier, err := cmd.Flags().GetString("tier")
 		checkFlag(tier, err)
+
+		env, err := cmd.Flags().GetString("env")
+		checkFlag(env, err)
 		if tier == "backend" {
 			for _, app := range strings.Split(apps, ",") {
-				utils.PreJavaDocker(app, project, version, strings.Join([]string{config.JavaPre.Dockerfile, arch}, "/"),
+				utils.PreJavaDocker(app, project, version, env, strings.Join([]string{config.JavaPre.Dockerfile, arch}, "/"),
 					config.JavaPre.Entrypoint)
 			}
 		} else if tier == "front" {
@@ -50,5 +53,5 @@ var dockerPreCmd = &cobra.Command{
 func init() {
 	dockerCmd.AddCommand(dockerPreCmd)
 
-	dockerPreCmd.Flags().StringP("timestamp", "s", "", "A tag of docker")
+	dockerPreCmd.Flags().StringP("type", "y", "", "A type of project")
 }

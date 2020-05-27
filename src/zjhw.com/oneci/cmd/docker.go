@@ -31,13 +31,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if project, err := cmd.Flags().GetString("project"); err == nil && project != "" {
-			fmt.Println("Project Name:", project)
-		}
-		if version, err := cmd.Flags().GetString("version"); err == nil && version != "" {
-			fmt.Println("Project Version:", version)
-		}
-
+		fmt.Println("Build Docker")
 	},
 }
 
@@ -54,6 +48,7 @@ func init() {
 	dockerCmd.PersistentFlags().StringP("application", "a", "", "A list of project")
 	dockerCmd.PersistentFlags().StringP("arch", "r", "", "A arch name of project(arm64/amd64)")
 	dockerCmd.PersistentFlags().StringP("tier", "t", "", "A tier name of project(front/backend)")
+	dockerCmd.PersistentFlags().StringP("env", "e", "", "A env name of project")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// dockerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
