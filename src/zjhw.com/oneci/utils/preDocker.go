@@ -31,8 +31,8 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 
 	// 查找编译出的jar包
 	filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() && strings.Contains(path, fmt.Sprintf("%s\\target", app)) && !strings.Contains(path, fmt.Sprintf("%s\\target\\", app)) {
-			if file, err := filepath.Glob(fmt.Sprintf("%s\\*.jar", path)); err == nil {
+		if info.IsDir() && strings.Contains(path, fmt.Sprintf("%s/target", app)) && !strings.Contains(path, fmt.Sprintf("%s\\target\\", app)) {
+			if file, err := filepath.Glob(fmt.Sprintf("%s/*.jar", path)); err == nil {
 				log.Printf("**** 应用 %s 找到相应的jar包: %s", app, file[0])
 				jarSplit := strings.Split(file[0], "-")
 				jarVersion := strings.TrimRight(jarSplit[len(jarSplit)-1], ".jar")
@@ -44,7 +44,7 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 
 				// 获取项目应用的配置
 				log.Printf("**** 获取 %s 项目的基本配置", project)
-				conf := func() *config.AppConfig{
+				conf := func() *config.AppConfig {
 					value, err := GetKV(config.Conf, fmt.Sprintf("/oneci/config/%s", project))
 					if err != nil {
 						log.Fatalf("**** 获取配置失败, key: %s: %v", fmt.Sprintf("/oneci/config/%s", project), err)
@@ -54,6 +54,7 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 					yaml.Unmarshal(consulConf, conf)
 					return conf
 				}()
+
 				singleAppConfig := CheckOutAppConfig("config", conf)
 				singleAppConfig.VERSION = version
 				singleAppConfig.PROJECT = project
@@ -83,7 +84,7 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 					log.Fatalf("**** 应用 %s 获取模板失败, key: %s: %v", app, dockerfile, err)
 				}
 
-				target, err := os.OpenFile(workerSpace+"/Dockerfile", os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0644)
+				target, err := os.OpenFile(workerSpace+"/Dockerfile", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 				if err != nil {
 					log.Fatalf("文件创建失败 %s", workerSpace+"/Dockerfile")
 				}
@@ -96,7 +97,7 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 				if err != nil {
 					log.Fatalf("**** 应用 %s 获取模板失败, key: %s: %v", app, entrypoint, err)
 				}
-				entry, err := os.OpenFile(workerSpace+"/docker-entrypoint.sh", os.O_CREATE | os.O_TRUNC | os.O_WRONLY, 0644)
+				entry, err := os.OpenFile(workerSpace+"/docker-entrypoint.sh", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
 				if err != nil {
 					log.Fatalf("文件创建失败 %s", workerSpace+"/docker-entrypoint.sh")
 				}
@@ -120,9 +121,22 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 
 				// 根据配置中心拉取字符库进容器
 				if singleAppConfig.FONT {
-					filepath.Walk("fonts", func(path string, info os.FileInfo, err error) error {
+					filepath.Walk("/ddhome/fonts", func(path string, info os.FileInfo, err error) error {
 						os.MkdirAll(strings.Join([]string{workerSpace, "fonts"}, "/"), 0755)
 						destFile, _ := os.Create(strings.Join([]string{workerSpace, "fonts", filepath.Base(path)}, "/"))
+						defer destFile.Close()
+						srcFile, _ := os.Open(path)
+						defer srcFile.Close()
+						io.Copy(destFile, srcFile)
+						return nil
+					})
+				}
+
+				// 根据配置中心拉取证书进容器
+				if singleAppConfig.CERT {
+					filepath.Walk("/ddhome/cert", func(path string, info os.FileInfo, err error) error {
+						os.MkdirAll(strings.Join([]string{workerSpace, "cert"}, "/"), 0755)
+						destFile, _ := os.Create(strings.Join([]string{workerSpace, "cert", filepath.Base(path)}, "/"))
 						defer destFile.Close()
 						srcFile, _ := os.Open(path)
 						defer srcFile.Close()
@@ -151,7 +165,6 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 		return err
 	})
 }
-
 
 func PreJavaScriptDocker() {
 

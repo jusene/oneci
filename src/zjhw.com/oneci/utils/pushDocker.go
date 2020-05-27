@@ -12,6 +12,8 @@ import (
 )
 
 func PushDocker(app, version, project, env, ty string, timestamp int64) {
+	const DOCKER_HOST = "tcp://127.0.0.1:2376"
+	os.Setenv("DOCKER_HOST", DOCKER_HOST)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
