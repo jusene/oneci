@@ -18,9 +18,9 @@ func checkFlag(flag interface{}, err error) {
 }
 
 var dockerPreCmd = &cobra.Command{
-	Use: "prepare",
+	Use:   "prepare",
 	Short: "docker build prepare",
-	Long: "docker build prepare",
+	Long:  "docker build prepare",
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
 		checkFlag(project, err)
@@ -52,6 +52,4 @@ var dockerPreCmd = &cobra.Command{
 
 func init() {
 	dockerCmd.AddCommand(dockerPreCmd)
-
-	dockerPreCmd.Flags().StringP("type", "y", "", "A type of project")
 }

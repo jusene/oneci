@@ -49,6 +49,7 @@ func init() {
 	dockerCmd.PersistentFlags().StringP("arch", "r", "", "A arch name of project(arm64/amd64)")
 	dockerCmd.PersistentFlags().StringP("tier", "t", "", "A tier name of project(front/backend)")
 	dockerCmd.PersistentFlags().StringP("env", "e", "", "A env name of project")
+	dockerCmd.PersistentFlags().StringP("type", "y", "", "A type of project")
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// dockerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
