@@ -2,15 +2,20 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/client-go" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/docker/docker" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/fsnotify/fsnotify" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/hashicorp/consul" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/hashicorp/hcl" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/inconshreveable/mousetrap" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/kr/fs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/kubernetes/client-go" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/magiconair/properties" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/mitchellh/go-homedir" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/mitchellh/mapstructure" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/pelletier/go-toml" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/pkg/errors" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/github.com/pkg/sftp" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/spf13/afero" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/spf13/cast" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/github.com/spf13/cobra" vcs="Git" />

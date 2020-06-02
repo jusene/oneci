@@ -8,17 +8,24 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"io"
+	"log"
 	"os"
 )
 
 func PushDocker(app, version, project, env, ty string, timestamp int64) {
-	const DOCKER_HOST = "tcp://127.0.0.1:2376"
-	os.Setenv("DOCKER_HOST", DOCKER_HOST)
+	if ty == "nil" {
+		ty = ""
+	}
+
+	const DockerHOST = "tcp://127.0.0.1:2376"
+	os.Setenv("DOCKER_HOST", DockerHOST)
+	log.Println("**** Push 镜像 ", app)
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
 	}
+
 	authConfig := types.AuthConfig{
 		Username: "admin",
 		Password: "dd@2019",
@@ -27,10 +34,11 @@ func PushDocker(app, version, project, env, ty string, timestamp int64) {
 	if err != nil {
 		panic(err)
 	}
+
 	authStr := base64.URLEncoding.EncodeToString(encodedJSON)
 
-	out, err := cli.ImagePull(ctx, fmt.Sprintf("harbor.zjhw.com/%s-%s/%s:%s.%d.%s",
-		project, env, app, version, timestamp, ty), types.ImagePullOptions{RegistryAuth: authStr})
+	out, err := cli.ImagePush(ctx, fmt.Sprintf("harbor.zjhw.com/%s-%s/%s:%s.%d%s",
+		project, env, app, version, timestamp, ty), types.ImagePushOptions{RegistryAuth: authStr})
 
 	if err != nil {
 		panic(err)

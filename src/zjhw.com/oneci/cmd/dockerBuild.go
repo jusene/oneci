@@ -12,25 +12,25 @@ var dockerBuildCmd = &cobra.Command{
 	Long:  "docker build",
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
-		checkFlag(project, err)
+		checkFlag(project, err, "project")
 
 		version, err := cmd.Flags().GetString("version")
-		checkFlag(version, err)
+		checkFlag(version, err, "version")
 
 		apps, err := cmd.Flags().GetString("application")
-		checkFlag(apps, err)
+		checkFlag(apps, err, "application")
 
 		timestamp, err := cmd.Flags().GetInt64("timestamp")
-		checkFlag(timestamp, err)
+		checkFlag(timestamp, err, "timestamp")
 
 		env, err := cmd.Flags().GetString("env")
-		checkFlag(env, err)
+		checkFlag(env, err, "env")
 
 		tier, err := cmd.Flags().GetString("tier")
-		checkFlag(tier, err)
+		checkFlag(tier, err, "tier")
 
 		ty, err := cmd.Flags().GetString("type")
-		checkFlag(ty, err)
+		checkFlag(env, err, "type")
 
 		for _, app := range strings.Split(apps, ",") {
 			utils.BuildDocker(app, version, project, env, ty, timestamp)

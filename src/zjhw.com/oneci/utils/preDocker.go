@@ -22,7 +22,7 @@ func CheckOutAppConfig(app string, conf *config.AppConfig) *config.AppInfo {
 }
 
 // 准备编译docker的准备工作
-func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
+func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint string) {
 	workerSpace := strings.Join([]string{app, "docker"}, "_")
 	// 创建打包使用的工作目录
 	if err := os.MkdirAll(workerSpace, 0755); err != nil {
@@ -31,8 +31,8 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 
 	// 查找编译出的jar包
 	filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if info.IsDir() && strings.Contains(path, fmt.Sprintf("%s/target", app)) && !strings.Contains(path, fmt.Sprintf("%s\\target\\", app)) {
-			if file, err := filepath.Glob(fmt.Sprintf("%s/*.jar", path)); err == nil {
+		if info.IsDir() && strings.Contains(path, fmt.Sprintf("%s/target", app)) {
+			if file, err := filepath.Glob(fmt.Sprintf("%s/*.jar", path)); err == nil && len(file) != 0 {
 				log.Printf("**** 应用 %s 找到相应的jar包: %s", app, file[0])
 				jarSplit := strings.Split(file[0], "-")
 				jarVersion := strings.TrimRight(jarSplit[len(jarSplit)-1], ".jar")
@@ -50,18 +50,46 @@ func PreJavaDocker(app, project, version, env, dockerfile, entrypoint string) {
 						log.Fatalf("**** 获取配置失败, key: %s: %v", fmt.Sprintf("/oneci/config/%s", project), err)
 					}
 					consulConf := value.Value
-					conf := new(config.AppConfig)
-					yaml.Unmarshal(consulConf, conf)
-					return conf
+					//fmt.Printf("*** 调试信息\n%s", string(consulConf))
+					c := new(config.AppConfig)
+					err = yaml.Unmarshal(consulConf, c)
+					if err != nil {
+						panic(err)
+					}
+					return c
 				}()
-
-				singleAppConfig := CheckOutAppConfig("config", conf)
+				singleAppConfig := CheckOutAppConfig(app, conf)
+				//fmt.Println(singleAppConfig)
 				singleAppConfig.VERSION = version
 				singleAppConfig.PROJECT = project
 				singleAppConfig.JARVERSION = jarVersion
+				singleAppConfig.ARCH = arch
+
+				// 特殊需求 部署方式
+				fmt.Println("********", ty)
+				if ty != "nil" {
+					singleAppConfig.TYPE = ty
+				}
+
+				// 根据部署环境查找websocket port
+				if len(singleAppConfig.WSPort) != 0 {
+					for _, wsinfo := range singleAppConfig.WSPort {
+						if wsinfo.ENV == env {
+							singleAppConfig.WS = wsinfo.PORT
+						}
+					}
+				}
+
+				// 根据部署环境查找对应的NFS SERVER
+				if len(singleAppConfig.NFServer) != 0 {
+					for _, nfsinfo := range singleAppConfig.NFServer {
+						if nfsinfo.ENV == env {
+							singleAppConfig.NFSIP = nfsinfo.Address
+						}
+					}
+				}
 
 				// 根据配置中心是否生成debug接口，规则dev: port+10000, test: port+20000, pre: port+30000, prod: port+40000
-
 				if singleAppConfig.Debug {
 					switch env {
 					case "dev":

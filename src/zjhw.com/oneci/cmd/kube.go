@@ -24,15 +24,10 @@ import (
 // kubeCmd represents the kube command
 var kubeCmd = &cobra.Command{
 	Use:   "kube",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "kube command",
+	Long:  `kube command`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("kube called")
+		fmt.Println("deploy kubernetes")
 	},
 }
 
@@ -48,4 +43,11 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// kubeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	kubeCmd.PersistentFlags().StringP("version", "v", "", "A version of project")
+	kubeCmd.PersistentFlags().StringP("project", "p", "", "A name of project")
+	kubeCmd.PersistentFlags().StringP("application", "a", "", "A list of project")
+	kubeCmd.PersistentFlags().StringP("arch", "r", "", "A arch name of project(arm64/amd64)")
+	kubeCmd.PersistentFlags().StringP("tier", "t", "", "A tier name of project(front/backend)")
+	kubeCmd.PersistentFlags().StringP("env", "e", "", "A env name of project")
+	kubeCmd.PersistentFlags().StringP("type", "y", "", "A type of project")
 }
