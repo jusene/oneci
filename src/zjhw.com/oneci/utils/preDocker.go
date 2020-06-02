@@ -66,7 +66,6 @@ func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint 
 				singleAppConfig.ARCH = arch
 
 				// 特殊需求 部署方式
-				fmt.Println("********", ty)
 				if ty != "nil" {
 					singleAppConfig.TYPE = ty
 				}
@@ -76,15 +75,6 @@ func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint 
 					for _, wsinfo := range singleAppConfig.WSPort {
 						if wsinfo.ENV == env {
 							singleAppConfig.WS = wsinfo.PORT
-						}
-					}
-				}
-
-				// 根据部署环境查找对应的NFS SERVER
-				if len(singleAppConfig.NFServer) != 0 {
-					for _, nfsinfo := range singleAppConfig.NFServer {
-						if nfsinfo.ENV == env {
-							singleAppConfig.NFSIP = nfsinfo.Address
 						}
 					}
 				}

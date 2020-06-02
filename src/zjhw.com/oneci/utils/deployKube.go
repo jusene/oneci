@@ -52,6 +52,15 @@ func DeployKube(conf *config.ConsulConfig, app, version, project, env, ty, arch 
 		}
 	}
 
+	// 根据部署环境查找对应的NFS SERVER
+	if len(singleAppConfig.NFServer) != 0 {
+		for _, nfsinfo := range singleAppConfig.NFServer {
+			if nfsinfo.ENV == env {
+				singleAppConfig.NFSIP = nfsinfo.Address
+			}
+		}
+	}
+
 	log.Printf("**** 获取 %s 项目 %s 应用的配置", project, app)
 	value, err := GetKV(conf, fmt.Sprintf("/oneci/template/%s/%s", project, app))
 	if err != nil {
