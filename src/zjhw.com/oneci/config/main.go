@@ -63,6 +63,10 @@ type java struct {
 	Entrypoint string
 }
 
+type javascript struct {
+	Dockerfile string
+}
+
 var Conf = &ConsulConfig{
 	Address: "192.168.66.100",
 	Port:    8500,
@@ -78,4 +82,8 @@ var HostConf = &HostConfig{
 var JavaPre = &java{
 	Dockerfile: "/oneci/template/docker/java/dockerfile",
 	Entrypoint: "/oneci/template/docker/java/entrypoint",
+}
+
+var JavaScript = &javascript{
+	Dockerfile: "/oneci/template/docker/vue/dockerfile",
 }

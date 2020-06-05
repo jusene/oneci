@@ -8,7 +8,7 @@ import (
 	"zjhw.com/oneci/config"
 )
 
-func DeployKube(conf *config.ConsulConfig, app, version, project, env, ty, arch string, timestamp int64) {
+func DeployJavaKube(conf *config.ConsulConfig, app, version, project, env, ty, arch string, timestamp int64) {
 	if ty == "nil" {
 		ty = ""
 	}
@@ -60,6 +60,51 @@ func DeployKube(conf *config.ConsulConfig, app, version, project, env, ty, arch 
 			}
 		}
 	}
+
+	// 根据部署环境查找websocket port
+	if len(singleAppConfig.WSPort) != 0 {
+		for _, wsinfo := range singleAppConfig.WSPort {
+			if wsinfo.ENV == env {
+				singleAppConfig.WS = wsinfo.PORT
+			}
+		}
+	}
+
+	log.Printf("**** 获取 %s 项目 %s 应用的配置", project, app)
+	value, err := GetKV(conf, fmt.Sprintf("/oneci/template/%s/%s", project, app))
+	if err != nil {
+		log.Fatalf("**** 获取配置失败, key: %s: %v", fmt.Sprintf("/oneci/config/%s/%s", project, app), err)
+	}
+
+	os.MkdirAll("kube", 0755)
+	target, err := os.OpenFile("kube/"+fmt.Sprintf("%s-%s%s.yml", app, env, ty), os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("文件创建失败 %s", "kube/"+fmt.Sprintf("%s-%s%s.yml", app, env, ty))
+	}
+	defer target.Close()
+	Render(string(value.Value), target, singleAppConfig)
+
+	SFTPut(config.HostConf.Host, config.HostConf.Username, config.HostConf.Password, config.HostConf.Port,
+		"kube/"+fmt.Sprintf("%s-%s%s.yml", app, env, ty),
+		fmt.Sprintf("/ddhome/k8s/%s/%s-%s%s.yml", project, app, env, ty))
+
+	SSHExec(config.HostConf.Host, config.HostConf.Username, config.HostConf.Password, config.HostConf.Port,
+		"/usr/local/bin/kubectl apply -f "+fmt.Sprintf("/ddhome/k8s/%s/%s-%s%s.yml", project, app, env, ty))
+}
+
+func DeployJavaScriptKube(conf *config.ConsulConfig, app, version, project, env, ty, arch string, timestamp int64) {
+	if ty == "nil" {
+		ty = ""
+	}
+
+	singleAppConfig := new(config.AppInfo)
+	singleAppConfig.TYPE = ty
+	singleAppConfig.ENV = env
+	singleAppConfig.VERSION = version
+	singleAppConfig.PROJECT = project
+	singleAppConfig.ARCH = arch
+	singleAppConfig.APP = app
+	singleAppConfig.TIMESTAMP = timestamp
 
 	log.Printf("**** 获取 %s 项目 %s 应用的配置", project, app)
 	value, err := GetKV(conf, fmt.Sprintf("/oneci/template/%s/%s", project, app))

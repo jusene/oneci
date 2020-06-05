@@ -35,8 +35,12 @@ var kubeDeployCmd = &cobra.Command{
 		arch, err := cmd.Flags().GetString("arch")
 		checkFlag(ty, err, "arch")
 
-		for _, app := range strings.Split(apps, ",") {
-			utils.DeployKube(config.Conf, app, version, project, env, ty, arch, timestamp)
+		if tier == "backend" {
+			for _, app := range strings.Split(apps, ",") {
+				utils.DeployJavaKube(config.Conf, app, version, project, env, ty, arch, timestamp)
+			}
+		} else if tier == "front" {
+			utils.DeployJavaScriptKube(config.Conf, apps, version, project, env, ty, arch, timestamp)
 		}
 	},
 }

@@ -70,15 +70,6 @@ func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint 
 					singleAppConfig.TYPE = ty
 				}
 
-				// 根据部署环境查找websocket port
-				if len(singleAppConfig.WSPort) != 0 {
-					for _, wsinfo := range singleAppConfig.WSPort {
-						if wsinfo.ENV == env {
-							singleAppConfig.WS = wsinfo.PORT
-						}
-					}
-				}
-
 				// 根据配置中心是否生成debug接口，规则dev: port+10000, test: port+20000, pre: port+30000, prod: port+40000
 				if singleAppConfig.Debug {
 					switch env {
@@ -184,6 +175,44 @@ func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint 
 	})
 }
 
-func PreJavaScriptDocker() {
+func PreJavaScriptDocker(app, project, version, env, arch, ty, dockerfile string) {
+	workspace := strings.Join([]string{app, "docker"}, "_")
+	os.MkdirAll(workspace, 0755)
 
+	// 将dist下的文件拷贝进工作目录
+	filepath.Walk("dist", func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() {
+			os.MkdirAll(strings.Join([]string{workspace, "dist", path}, "/"), 0755)
+		} else {
+			destFile, _ := os.Create(strings.Join([]string{workspace, "dist", path}, "/"))
+			defer destFile.Close()
+			srcFile, _ := os.Open(path)
+			defer srcFile.Close()
+			io.Copy(destFile, srcFile)
+		}
+		return nil
+	})
+
+	// 生成相应配置
+	singleAppConfig := new(config.AppInfo)
+	singleAppConfig.TYPE = ty
+	singleAppConfig.ENV = env
+	singleAppConfig.VERSION = version
+	singleAppConfig.PROJECT = project
+	singleAppConfig.ARCH = arch
+	singleAppConfig.APP = app
+
+	// 生成dockerfile
+	log.Printf("**** 应用 %s 生成相应的Dockerfile", app)
+	value, err := GetKV(config.Conf, dockerfile)
+	if err != nil {
+		log.Fatalf("**** 应用 %s 获取模板失败, key: %s: %v", app, dockerfile, err)
+	}
+
+	target, err := os.OpenFile(workspace+"/Dockerfile", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("文件创建失败 %s", workspace+"/Dockerfile")
+	}
+	defer target.Close()
+	Render(string(value.Value), target, singleAppConfig)
 }

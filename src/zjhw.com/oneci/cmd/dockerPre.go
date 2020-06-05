@@ -7,6 +7,16 @@ import (
 	"zjhw.com/oneci/utils"
 )
 
+type BuildInfo struct {
+	apps      []string
+	project   string
+	version   string
+	env       string
+	arch      string
+	ty        string
+	timestamp int64
+}
+
 func checkFlag(flag interface{}, err error, param string) {
 	if err != nil {
 		panic(err)
@@ -48,7 +58,7 @@ var dockerPreCmd = &cobra.Command{
 				utils.PreJavaDocker(app, project, version, env, arch, ty, config.JavaPre.Dockerfile, config.JavaPre.Entrypoint)
 			}
 		} else if tier == "front" {
-			utils.PreJavaScriptDocker()
+			utils.PreJavaScriptDocker(apps, project, version, env, arch, ty, config.JavaScript.Dockerfile)
 		}
 	},
 }
