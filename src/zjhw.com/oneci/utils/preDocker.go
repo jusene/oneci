@@ -35,7 +35,10 @@ func PreJavaDocker(app, project, version, env, arch, ty, dockerfile, entrypoint 
 			if file, err := filepath.Glob(fmt.Sprintf("%s/*.jar", path)); err == nil && len(file) != 0 {
 				log.Printf("**** 应用 %s 找到相应的jar包: %s", app, file[0])
 				jarSplit := strings.Split(file[0], "-")
+				// jar包的版本
 				jarVersion := strings.TrimRight(jarSplit[len(jarSplit)-1], ".jar")
+
+				// 拷贝jar包到工作目录
 				destFile, _ := os.Create(strings.Join([]string{workerSpace, filepath.Base(file[0])}, "/"))
 				defer destFile.Close()
 				srcFile, _ := os.Open(file[0])
